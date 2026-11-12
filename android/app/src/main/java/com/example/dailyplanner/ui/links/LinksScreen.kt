@@ -6,12 +6,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -80,7 +83,9 @@ fun LinksScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Surface transient messages as a snackbar (colour reflects error state).
+    // Surface transient messages as a snackbar (the mobile equivalent of the
+    // desktop setMessage() paragraph). `state.message` is a UiMessage holder;
+    // each new message re-shows the snackbar and is then consumed.
     val currentMessage = state.message
     LaunchedEffect(currentMessage) {
         if (currentMessage == null) return@LaunchedEffect
@@ -144,11 +149,16 @@ fun LinksScreen(
             }
         }
 
+        // The root no longer pads the bottom inset (so the mobile layout uses the
+        // full height). The snackbar, however, must sit ABOVE the navigation bar
+        // / gesture area — otherwise it renders under it and you only see an
+        // empty sliver. So give the host its own bottom inset padding here.
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(16.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
         ) { data ->
             Snackbar(
                 snackbarData = data,
@@ -156,7 +166,10 @@ fun LinksScreen(
                     RedLight.copy(alpha = 0.15f)
                 } else {
                     Base700
-                }
+                },
+                contentColor = Slate200,
+                actionColor = Brand,
+                dismissActionContentColor = Slate200
             )
         }
 

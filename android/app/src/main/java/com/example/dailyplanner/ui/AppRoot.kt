@@ -3,8 +3,10 @@ package com.example.dailyplanner.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
@@ -24,17 +26,20 @@ fun AppRoot(viewModel: AppViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     // The activity draws edge-to-edge, so content would otherwise run under the
-    // status bar (top) and navigation bar / on-screen keyboard (bottom). Pad the
-    // whole tree by the safe-drawing insets once, here at the root, so every
-    // screen keeps its text clear of the system bars without each one repeating
-    // the inset handling. `consumeWindowInsets` stops children from re-applying
-    // the same padding.
+    // status bar (top) and side system bars. Pad only the TOP and HORIZONTAL
+    // insets — the bottom (navigation bar) inset is intentionally left out so
+    // the mobile layout uses the full height down to the bottom edge. The
+    // activity uses android:windowSoftInputMode="adjustResize", so the on-screen
+    // keyboard still pushes content up at the window level.
+    // `consumeWindowInsets` stops children from re-applying the same padding.
+    val appInsets = WindowInsets.safeDrawing
+        .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
     Box(
         Modifier
             .fillMaxSize()
             .background(Base900)
-            .windowInsetsPadding(WindowInsets.safeDrawing)
-            .consumeWindowInsets(WindowInsets.safeDrawing)
+            .windowInsetsPadding(appInsets)
+            .consumeWindowInsets(appInsets)
     ) {
         when {
             !state.sessionLoaded -> Unit // brief splash while the session loads
@@ -69,4 +74,5 @@ fun AppRoot(viewModel: AppViewModel) {
         }
     }
 }
+
 
