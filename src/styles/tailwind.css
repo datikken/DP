@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply min-h-screen flex items-center justify-center bg-gradient-to-br from-base-900 to-base-700 text-slate-200;
+  }
+}
+
+/* Drag-and-drop feedback for the links sidebar. These classes are added at
+   runtime, so Tailwind's content scanner never sees them - write plain CSS.
+   #6c5ce7 is the `brand` colour from tailwind.config.js. */
+.drop-before {
+  box-shadow: inset 0 2px 0 0 #6c5ce7;
+}
+
+.drop-after {
+  box-shadow: inset 0 -2px 0 0 #6c5ce7;
+}
+
+.dragging {
+  opacity: 0.4;
+}

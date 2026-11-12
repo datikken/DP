@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. Compose draws its own UI, so the XML theme
+         only needs to set the window background and disable the action bar. -->
+    <style name="Theme.DailyPlanner" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#1E1E2F</item>
+        <item name="android:navigationBarColor">#1E1E2F</item>
+        <item name="android:windowBackground">#1E1E2F</item>
+    </style>
+</resources>

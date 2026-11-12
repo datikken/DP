@@ -1,0 +1,32 @@
+{
+  "name": "dailyplanner",
+  "version": "1.0.1",
+  "description": "DailyPlanner - a personal link manager with SQLite storage",
+  "main": "dist/main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "build:renderer": "esbuild src/renderer/auth.ts src/renderer/links.ts --bundle --outdir=dist/renderer --platform=browser --format=iife",
+    "build:main": "esbuild src/main.ts src/preload.ts --bundle --outdir=dist --platform=node --format=cjs --external:electron --external:node-sqlite3-wasm",
+    "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./dist/renderer/styles.css --minify",
+    "copy:html": "node scripts/copy-html.js",
+    "build": "npm run build:main && npm run build:renderer && npm run build:css && npm run copy:html",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron .",
+    "icon": "node scripts/make-icon.js",
+    "icon:android": "node scripts/make-android-icons.js",
+    "pack:win": "npm run icon && npm run build && electron-builder --win --x64 --dir --config electron-builder.config.js",
+    "dist:win": "npm run icon && npm run build && electron-builder --win --x64 --config electron-builder.config.js"
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.23.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "node-sqlite3-wasm": "^0.8.61"
+  }
+}

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    />
+    <title>DailyPlanner</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="block bg-base-900">
+    <div class="flex h-screen overflow-hidden">
+      <!-- Sidebar: list of links -->
+      <aside
+        class="flex w-80 shrink-0 flex-col border-r border-base-700 bg-base-800"
+      >
+        <div class="flex items-center justify-between border-b border-base-700 px-4 py-4">
+          <h1 class="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-xl font-extrabold text-transparent">
+            DailyPlanner
+          </h1>
+          <div class="flex items-center gap-2">
+            <button
+              id="refresh-all-btn"
+              type="button"
+              title="Re-check all links"
+              aria-label="Re-check all links"
+              class="rounded-lg bg-base-600 p-1.5 text-slate-300 transition hover:bg-base-700 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <svg
+                id="refresh-all-icon"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                <path d="M21 3v6h-6" />
+              </svg>
+            </button>
+            <button
+              id="new-btn"
+              type="button"
+              title="New link"
+              class="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
+            >
+              + New
+            </button>
+          </div>
+        </div>
+
+        <!-- Search: filters links by name or URL -->
+        <div class="border-b border-base-700 px-3 py-2">
+          <div class="relative">
+            <svg
+              class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="M21 21l-4.3-4.3"></path>
+            </svg>
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Search links…"
+              aria-label="Search links by name or URL"
+              autocomplete="off"
+              spellcheck="false"
+              class="w-full rounded-lg border border-base-600 bg-base-700 py-1.5 pl-8 pr-8 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-brand"
+            />
+            <button
+              id="search-clear"
+              type="button"
+              title="Clear search"
+              aria-label="Clear search"
+              class="absolute right-1.5 top-1/2 hidden -translate-y-1/2 rounded p-1 text-slate-500 transition hover:bg-base-600 hover:text-slate-200"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M18 6L6 18"></path>
+                <path d="M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <nav id="sidebar-list" class="flex-1 overflow-y-auto p-2">
+          <!-- populated by links.ts -->
+        </nav>
+
+        <div id="sidebar-empty" class="hidden px-4 py-8 text-center text-sm text-slate-500">
+          No links yet.
+        </div>
+
+        <div id="sidebar-no-match" class="hidden px-4 py-8 text-center text-sm text-slate-500">
+          No links match your search.
+        </div>
+
+        <div class="border-t border-base-700 px-4 py-3 text-xs text-slate-500">
+          <span id="link-count">0</span> link(s)
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <div class="flex min-w-0 flex-1 flex-col">
+        <header
+          class="flex items-center justify-between border-b border-base-700 bg-base-800 px-6 py-4"
+        >
+          <p id="greeting" class="text-sm text-slate-400"></p>
+          <button
+            id="logout-btn"
+            type="button"
+            class="rounded-lg bg-base-600 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-base-700"
+          >
+            Log out
+          </button>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6">
+          <p id="message" class="mb-4 min-h-[20px] text-sm"></p>
+
+          <!-- Empty selection state -->
+          <div
+            id="detail-empty"
+            class="flex h-full flex-col items-center justify-center text-center text-slate-500"
+          >
+            <p class="text-base">Select a link from the sidebar</p>
+            <p class="mt-1 text-sm">or create a new one with “+ New”.</p>
+          </div>
+
+          <!-- Detail panel for the selected link -->
+          <div id="detail" class="hidden max-w-2xl">
+            <div class="mb-4 flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <h2 id="detail-name" class="truncate text-2xl font-bold text-slate-100"></h2>
+                <p
+                  id="detail-url"
+                  class="mt-1 block truncate text-sm text-brand-light"
+                ></p>
+              </div>
+              <div class="flex shrink-0 gap-2">
+                <button
+                  id="open-btn"
+                  type="button"
+                  title="Open in browser"
+                  aria-label="Open in browser"
+                  class="flex items-center gap-2 rounded-lg bg-base-600 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-base-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M2 12h20"></path>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                  Open in browser
+                </button>
+                <button
+                  id="edit-btn"
+                  type="button"
+                  class="rounded-lg bg-base-600 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-base-700"
+                >
+                  Edit
+                </button>
+                <button
+                  id="delete-btn"
+                  type="button"
+                  class="rounded-lg bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-400 transition hover:bg-red-500/30"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <dl
+              class="grid grid-cols-2 gap-4 rounded-xl border border-base-600 bg-base-800 p-5"
+            >
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  HTTP Status
+                </dt>
+                <dd id="detail-status" class="mt-1"></dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Last Check
+                </dt>
+                <dd id="detail-check" class="mt-1 text-slate-200"></dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Created
+                </dt>
+                <dd id="detail-created" class="mt-1 text-slate-200"></dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Updated
+                </dt>
+                <dd id="detail-updated" class="mt-1 text-slate-200"></dd>
+              </div>
+            </dl>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal / form -->
+    <div
+      id="modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4"
+    >
+      <div
+        class="w-full max-w-md rounded-2xl border border-base-600 bg-base-800 p-6 shadow-2xl"
+      >
+        <h2 id="modal-title" class="mb-4 text-lg font-bold text-slate-100">
+          New Link
+        </h2>
+        <form id="link-form" class="space-y-3">
+          <input type="hidden" id="link-id" />
+
+          <div>
+            <label class="mb-1 block text-xs font-semibold text-slate-400">
+              URL *
+            </label>
+            <input
+              id="url"
+              type="text"
+              placeholder="https://example.com/page"
+              class="w-full rounded-lg border border-base-600 bg-base-700 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-brand"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-semibold text-slate-400">
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              placeholder="e.g. Docs (optional)"
+              class="w-full rounded-lg border border-base-600 bg-base-700 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-brand"
+            />
+          </div>
+
+          <div id="meta-fields" class="hidden grid-cols-2 gap-3">
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-400">
+                HTTP Status
+              </label>
+              <input
+                id="http_status"
+                type="number"
+                placeholder="200"
+                class="w-full rounded-lg border border-base-600 bg-base-700 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-brand"
+              />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold text-slate-400">
+                Last Check
+              </label>
+              <input
+                id="last_check"
+                type="datetime-local"
+                class="w-full rounded-lg border border-base-600 bg-base-700 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-brand"
+              />
+            </div>
+          </div>
+
+          <p id="form-error" class="min-h-[18px] text-sm text-red-400"></p>
+
+          <div class="flex justify-end gap-3 pt-1">
+            <button
+              id="cancel-btn"
+              type="button"
+              class="rounded-lg bg-base-600 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-base-700"
+            >
+              Cancel
+            </button>
+            <button
+              id="save-btn"
+              type="submit"
+              class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="links.js"></script>
+  </body>
+</html>
